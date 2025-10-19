@@ -1,0 +1,100 @@
+.earthquake-section {
+  position: relative;
+  width: 100%;
+  height: 400vh;
+  background: linear-gradient(180deg, #1a0a0a 0%, #2d1414 50%, #3d1a1a 100%);
+  z-index: 20;
+}
+
+.earthquake-canvas-wrapper {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 21;
+}
+
+.earthquake-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  padding: 10vh 0;
+  z-index: 22;
+  pointer-events: none;
+}
+
+.earthquake-card {
+  width: 90%;
+  max-width: 480px;
+  padding: 2rem;
+  background: rgba(20, 10, 10, 0.5);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(239, 68, 68, 0.25);
+  pointer-events: auto;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.earthquake-card.left {
+  margin-left: 5%;
+}
+
+.earthquake-card.right {
+  margin-left: auto;
+  margin-right: 5%;
+}
+
+.earthquake-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 12px 48px rgba(239, 68, 68, 0.45);
+  border-color: rgba(239, 68, 68, 0.6);
+}
+
+.earthquake-card h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #fca5a5 0%, #f87171 50%, #ef4444 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.earthquake-card p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #fecaca;
+  opacity: 0.95;
+}
+
+@media (max-width: 768px) {
+  .earthquake-section {
+    height: 350vh;
+  }
+
+  .earthquake-card {
+    padding: 1.5rem;
+    max-width: 85%;
+  }
+
+  .earthquake-card.left,
+  .earthquake-card.right {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .earthquake-card h2 {
+    font-size: 1.5rem;
+  }
+
+  .earthquake-card p {
+    font-size: 0.95rem;
+  }
+}
