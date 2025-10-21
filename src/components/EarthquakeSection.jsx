@@ -78,8 +78,9 @@ function Scene({ storyIndex, scrollProgress }) {
       <PerspectiveCamera ref={cameraRef} makeDefault position={[0, 2, 8]} fov={55} />
       <ambientLight intensity={0.5} />
       <directionalLight position={[8, 8, 5]} intensity={1} />
-      <pointLight position={[-6, 4, -4]} intensity={0.9} color="#ef4444" />
-      <pointLight position={[6, -3, 4]} intensity={0.7} color="#f59e0b" />
+      <pointLight position={[-6, 4, -4]} intensity={0.9} color="#6366f1" />
+      <pointLight position={[6, -3, 4]} intensity={0.7} color="#8b5cf6" />
+      <pointLight position={[0, -5, 0]} intensity={0.5} color="#ec4899" />
       <EarthquakeModel storyIndex={storyIndex} />
       <Environment preset="night" />
     </>
@@ -94,20 +95,28 @@ export default function EarthquakeSection() {
 
   const stories = [
     {
-      title: "Data Visualization",
-      text: "Two decades of seismic activity mapped in three dimensions, revealing Earth's dynamic nature."
+      badge: "🌱 Just Starting",
+      title: "The Beginning of Something Big",
+      text: "We're at the start of an ambitious journey to build a Nairobi simulation world. It's early days, but we're excited about what's ahead and ready to learn as we go.",
+      metric: "Day One"
     },
     {
-      title: "Patterns Emerge",
-      text: "Each point represents a tremor, together forming the story of our planet's restless energy."
+      badge: "🤝 Join Us",
+      title: "Looking for 3D Artists",
+      text: "We need talented developers who can create 3D models and animations using modern tools like Blender, Spline, and AI-powered workflows. Your skills can help bring Nairobi to life.",
+      metric: "Open Roles"
     },
     {
-      title: "Global Impact",
-      text: "From minor shifts to major quakes, data transforms into understanding and preparedness."
+      badge: "🤖 AI-Powered",
+      title: "Modern Tools & Workflows",
+      text: "We're leveraging AI tools and cutting-edge tech to accelerate development. From procedural generation to AI-assisted modeling—we're exploring every possibility to build smarter.",
+      metric: "AI-First"
     },
     {
-      title: "Future Insights",
-      text: "Through visualization, we decode the past to predict and protect our tomorrow."
+      badge: "📚 Learn Together",
+      title: "Growing as We Build",
+      text: "This is a learning journey for all of us. We hope to go far, document everything, and grow our skills together. Join our community and let's build the future of Nairobi.",
+      metric: "Community"
     }
   ];
 
@@ -164,8 +173,10 @@ export default function EarthquakeSection() {
             ref={(el) => (contentRefs.current[index] = el)}
             className={`earthquake-card ${index % 2 === 0 ? 'left' : 'right'}`}
           >
+            <div className="earthquake-badge">{story.badge}</div>
             <h2>{story.title}</h2>
             <p>{story.text}</p>
+            <div className="earthquake-metric">{story.metric}</div>
           </div>
         ))}
       </div>

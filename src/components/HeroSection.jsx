@@ -13,152 +13,126 @@ function CarModel({ scrollProgress }) {
 
   useFrame((state) => {
     if (carRef.current) {
-      carRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.3) * 0.1;
-      carRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.05;
+      const time = state.clock.elapsedTime;
+      const idleRotation = Math.sin(time * 0.3) * 0.08;
+      const idleFloat = Math.sin(time * 0.5) * 0.03;
+      
+      const scrollRotation = scrollProgress * Math.PI * 2.5;
+      const scrollTilt = Math.sin(scrollProgress * Math.PI) * 0.15;
+      const scrollLift = scrollProgress * 1.2;
+      const scrollForward = scrollProgress * 3;
+      
+      carRef.current.rotation.y = scrollRotation + idleRotation;
+      carRef.current.rotation.x = scrollTilt;
+      carRef.current.rotation.z = Math.sin(scrollProgress * Math.PI * 2) * 0.1;
+      carRef.current.position.y = 0.2 + scrollLift + idleFloat;
+      carRef.current.position.z = scrollForward;
+      
+      const scale = 1.2 + scrollProgress * 0.5;
+      carRef.current.scale.set(scale, scale, scale);
     }
   });
 
-  useEffect(() => {
-    if (carRef.current) {
-      carRef.current.rotation.y = scrollProgress * Math.PI * 1.5;
-    }
-  }, [scrollProgress]);
-
-  return <primitive ref={carRef} object={scene} scale={1.5} position={[0, -0.5, 0]} />;
+  return <primitive ref={carRef} object={scene} scale={1.2} position={[0, 0.2, 0]} />;
 }
 
 function Scene({ scrollProgress }) {
   const cameraRef = useRef();
+  const lightRef = useRef();
 
-  useFrame(() => {
+  useFrame((state) => {
     if (cameraRef.current) {
+      const time = state.clock.elapsedTime;
+      const breathe = Math.sin(time * 0.4) * 0.3;
+      
       if (scrollProgress < 0.33) {
-        const t = scrollProgress / 0.33;
-        cameraRef.current.position.set(0, 2, 7 - t * 1.5);
-        cameraRef.current.fov = 55 - t * 10;
+        const t = gsap.utils.interpolate(0, 1, scrollProgress / 0.33, 0.3);
+        const x = -6 + t * 8 + breathe;
+        const y = 2 - t * 1.5;
+        const z = 20 - t * 6;
+        cameraRef.current.position.set(x, y, z);
+        cameraRef.current.fov = 70 - t * 10;
       } else if (scrollProgress < 0.66) {
-        const t = (scrollProgress - 0.33) / 0.33;
-        cameraRef.current.position.set(t * 5, 2 + t * 1, 5.5 - t * 0.5);
-        cameraRef.current.fov = 45 + t * 5;
+        const t = gsap.utils.interpolate(0, 1, (scrollProgress - 0.33) / 0.33, 0.3);
+        const angle = t * Math.PI * 0.8;
+        const radius = 14 - t * 2;
+        const x = Math.sin(angle) * radius;
+        const z = Math.cos(angle) * radius;
+        const y = 3.5 + t * 1.5 + breathe * 0.5;
+        cameraRef.current.position.set(x, y, z);
+        cameraRef.current.fov = 60 + t * 15;
       } else {
-        const t = (scrollProgress - 0.66) / 0.34;
-        cameraRef.current.position.set(5 - t * 2, 3 + t * 3, 5 + t * 2);
-        cameraRef.current.fov = 50 + t * 15;
+        const t = gsap.utils.interpolate(0, 1, (scrollProgress - 0.66) / 0.34, 0.3);
+        const x = 8 - t * 8;
+        const y = 5 + t * 3;
+        const z = 12 + t * 8;
+        cameraRef.current.position.set(x, y, z);
+        cameraRef.current.fov = 75 + t * 15;
       }
       
-      cameraRef.current.lookAt(0, 0, 0);
+      const lookAtY = 0.2 + scrollProgress * 0.8;
+      const lookAtZ = scrollProgress * 2;
+      cameraRef.current.lookAt(0, lookAtY, lookAtZ);
       cameraRef.current.updateProjectionMatrix();
+    }
+    
+    if (lightRef.current) {
+      const angle = state.clock.elapsedTime * 0.5 + scrollProgress * Math.PI;
+      lightRef.current.position.x = Math.sin(angle) * 12;
+      lightRef.current.position.z = Math.cos(angle) * 12;
+      lightRef.current.intensity = 1.2 + Math.sin(scrollProgress * Math.PI) * 0.5;
     }
   });
 
   return (
     <>
-      <PerspectiveCamera ref={cameraRef} makeDefault position={[0, 2, 7]} fov={55} />
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[10, 10, 5]} intensity={1} />
-      <spotLight position={[-10, 10, -5]} angle={0.3} intensity={0.5} />
+      <PerspectiveCamera ref={cameraRef} makeDefault position={[-6, 2, 20]} fov={70} />
+      <ambientLight intensity={0.4} />
+      <directionalLight ref={lightRef} position={[10, 10, 5]} intensity={1.2} castShadow />
+      <spotLight position={[-10, 10, -5]} angle={0.3} intensity={0.6} penumbra={0.5} />
+      <pointLight position={[0, 5, 0]} intensity={0.8} distance={20} decay={2} color="#a5b4fc" />
       <CarModel scrollProgress={scrollProgress} />
       <Environment preset="sunset" />
+      <fog attach="fog" args={['#0a0e27', 15, 35]} />
     </>
   );
 }
 
 export default function HeroSection() {
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [currentStory, setCurrentStory] = useState(0);
   const heroRef = useRef();
-  const textRefs = useRef([]);
-
-  const stories = [
-    {
-      title: "The Journey Begins",
-      text: "In a world where code shapes reality, every line written drives us forward."
-    },
-    {
-      title: "Innovation in Motion",
-      text: "Technology accelerates, transforming dreams into digital destinations."
-    },
-    {
-      title: "The Coded Tomorrow",
-      text: "Where imagination meets execution, the future is built one commit at a time."
-    }
-  ];
+  const titleRef = useRef();
+  const subtitleRef = useRef();
+  const ctaRef = useRef();
 
   useEffect(() => {
     const ctx = gsap.context(() => {
       ScrollTrigger.create({
-        id: 'hero-scroll',
         trigger: heroRef.current,
         start: 'top top',
         end: 'bottom top',
         scrub: 1,
-        onUpdate: (self) => {
-          setScrollProgress(self.progress);
-          const storyIndex = Math.min(Math.floor(self.progress * stories.length), stories.length - 1);
-          setCurrentStory(storyIndex);
-          
-          textRefs.current.forEach((ref, index) => {
-            if (ref) {
-              const storyStart = index / stories.length;
-              const storyEnd = (index + 1) / stories.length;
-              const fadeRange = 0.1;
-              
-              let opacity = 0;
-              if (self.progress >= storyStart && self.progress < storyStart + fadeRange) {
-                opacity = (self.progress - storyStart) / fadeRange;
-              } else if (self.progress >= storyStart + fadeRange && self.progress < storyEnd - fadeRange) {
-                opacity = 1;
-              } else if (self.progress >= storyEnd - fadeRange && self.progress < storyEnd) {
-                opacity = 1 - (self.progress - (storyEnd - fadeRange)) / fadeRange;
-              }
-              
-              ref.style.opacity = opacity;
-            }
-          });
-        }
+        onUpdate: (self) => setScrollProgress(self.progress)
       });
 
-      textRefs.current.forEach((ref) => {
-        if (ref) {
-          gsap.set(ref, { opacity: 0, y: 0 });
-        }
-      });
+      gsap.fromTo(titleRef.current,
+        { opacity: 0, y: 50 },
+        { opacity: 1, y: 0, duration: 1.2, ease: 'power3.out', delay: 0.3 }
+      );
 
-      textRefs.current.forEach((ref, index) => {
-        if (ref) {
-          gsap.to(ref, {
-            opacity: (self) => {
-              const progress = ScrollTrigger.getById('hero-scroll')?.progress || 0;
-              const storyStart = index / stories.length;
-              const storyEnd = (index + 1) / stories.length;
-              const fadeRange = 0.1;
-              
-              if (progress < storyStart) return 0;
-              if (progress < storyStart + fadeRange) {
-                return (progress - storyStart) / fadeRange;
-              }
-              if (progress < storyEnd - fadeRange) return 1;
-              if (progress < storyEnd) {
-                return 1 - (progress - (storyEnd - fadeRange)) / fadeRange;
-              }
-              return 0;
-            },
-            y: 0,
-            scrollTrigger: {
-              id: index === 0 ? 'hero-scroll' : undefined,
-              trigger: heroRef.current,
-              start: 'top top',
-              end: 'bottom top',
-              scrub: 0.5,
-              onUpdate: () => ref.style.opacity = ''
-            }
-          });
-        }
-      });
+      gsap.fromTo(subtitleRef.current,
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 1, ease: 'power3.out', delay: 0.6 }
+      );
+
+      gsap.fromTo(ctaRef.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.9 }
+      );
     }, heroRef);
 
     return () => ctx.revert();
-  }, [stories.length]);
+  }, []);
 
   return (
     <div ref={heroRef} className="hero-section">
@@ -168,27 +142,46 @@ export default function HeroSection() {
         </Canvas>
       </div>
       
-      <div className="story-overlay">
-        <div className="brand-title">
-          <h1>The Coded Tomorrow</h1>
-          <p className="tagline">Driving Innovation Through Code</p>
+      <div className="hero-content">
+        <div className="hero-left">
+          <div className="hero-badge">Nairobi • Kenya 🇰🇪</div>
+          <h1 ref={titleRef} className="hero-title" style={{fontSize: '4.5rem'}}>
+            Building
+            <span className="gradient-text"> Nairobi</span>
+            <br />In The Metaverse
+          </h1>
+          <p ref={subtitleRef} className="hero-subtitle">
+            A digital creative agency crafting a virtual Nairobi simulation world.
+            We document every step, share our journey, and build in public.
+          </p>
+          <div ref={ctaRef} className="hero-cta">
+            <button className="btn-primary">Follow Our Journey</button>
+            <button className="btn-secondary">View Dev Logs</button>
+          </div>
         </div>
 
-        {stories.map((story, index) => (
-          <div
-            key={index}
-            ref={(el) => (textRefs.current[index] = el)}
-            className={`story-text ${currentStory === index ? 'active' : ''}`}
-          >
-            <h2>{story.title}</h2>
-            <p>{story.text}</p>
+        <div className="hero-right">
+          <div className="feature-card">
+            <div className="feature-icon">🎮</div>
+            <h3>World Development</h3>
+            <p>Nairobi simulation</p>
           </div>
-        ))}
+          <div className="feature-card">
+            <div className="feature-icon">📝</div>
+            <h3>Build In Public</h3>
+            <p>Documented journey</p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon">🌍</div>
+            <h3>Local Stories</h3>
+            <p>Authentic Nairobi</p>
+          </div>
+        </div>
       </div>
 
       <div className="scroll-indicator">
-        <span>Scroll to explore</span>
-        <div className="scroll-arrow">↓</div>
+        <span>Scroll</span>
+        <div className="scroll-line"></div>
       </div>
     </div>
   );

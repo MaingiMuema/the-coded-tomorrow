@@ -3,6 +3,8 @@ import HeroSection from './components/HeroSection';
 import StorySection from './components/StorySection';
 import EarthquakeSection from './components/EarthquakeSection';
 import DestinySection from './components/DestinySection';
+import CreatorSection from './components/CreatorSection';
+import CultureSection from './components/CultureSection';
 
 function App() {
   return (
@@ -10,10 +12,9 @@ function App() {
       <HeroSection />
       <StorySection />
       <EarthquakeSection />
-      <DestinySection />
-      <section style={{ height: '100vh', background: '#0a0e27', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-        <h2>Continue Your Journey...</h2>
-      </section>
+      <CultureSection />
+      <CreatorSection />
+      {/*<DestinySection />*/}
     </div>
   );
 }
